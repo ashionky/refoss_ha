@@ -1,0 +1,4 @@
+./dist
+./build
+.idea
+./refoss_ha.egg-info
