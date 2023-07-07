@@ -1,3 +1,4 @@
+README.md
 setup.py
 refoss_ha/__init__.py
 refoss_ha/const.py

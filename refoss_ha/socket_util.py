@@ -12,7 +12,7 @@ discoverMap=dict()
 pushStateDataList=[]
 
 
-class MerossSocket :
+class SocketUtil :
 
     def __init__(self):
         self.socket = socket(AF_INET, SOCK_DGRAM)
