@@ -48,7 +48,7 @@ class SocketServerProtocol(asyncio.DatagramProtocol):
     def datagram_received(self, data: bytes, addr: tuple[str, int]) -> None:
         """Handle incoming datagram messages."""
         json_str = format(data.decode("utf-8"))
-        print(json_str)
+
         data_dict = json.loads(json_str)
         if self._message_received:
             self._message_received(data_dict)
