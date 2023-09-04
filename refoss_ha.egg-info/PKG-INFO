@@ -1,12 +1,6 @@
 Metadata-Version: 2.1
 Name: refoss-ha
-Version: 1.0.5
-Summary: UNKNOWN
+Version: 1.0.6
 Author: ashionky
 Author-email: 495519020@qq.com
-License: UNKNOWN
-Platform: UNKNOWN
-Requires-Python: >=3.8
-
-UNKNOWN
-
+Requires-Python: >=3.11

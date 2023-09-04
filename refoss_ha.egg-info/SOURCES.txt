@@ -2,9 +2,10 @@ README.md
 setup.py
 refoss_ha/__init__.py
 refoss_ha/const.py
+refoss_ha/device_manager.py
 refoss_ha/enums.py
 refoss_ha/http_device.py
-refoss_ha/socket_util.py
+refoss_ha/socket_server.py
 refoss_ha/util.py
 refoss_ha.egg-info/PKG-INFO
 refoss_ha.egg-info/SOURCES.txt
