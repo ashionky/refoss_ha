@@ -1,4 +1,4 @@
 /dist
-/build
+/build/*
 .idea
 /refoss_ha.egg-info

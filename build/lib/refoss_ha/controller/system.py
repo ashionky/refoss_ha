@@ -15,7 +15,7 @@ class SystemAllMixin(BaseDevice):
 
     async def async_update(self):
         """Update."""
-        result = await self.device.async_execute_cmd(
+        result = await self.async_execute_cmd(
             self.device.uuid, method="GET", namespace=Namespace.SYSTEM_ALL, payload={}
         )
         if result is None:
