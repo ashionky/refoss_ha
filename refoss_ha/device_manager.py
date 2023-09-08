@@ -63,9 +63,16 @@ class RefossDeviceManager:
             if device is None:
                 return
             old_device: BaseDevice = self.base_device_map.get(device.uuid)
-            if old_device is not None:
-                if old_device.inner_ip == device.inner_ip:
-                    return
+            if old_device is not None and old_device.inner_ip == device.inner_ip:
+                   if old_device.online == False:
+                       # update device status online
+                       old_device.online = True
+                       self.base_device_map[device.uuid] = old_device
+                       asyncio.run_coroutine_threadsafe(
+                           self.async_update_device_online(old_device), loop=self.loop
+                       )
+                   return
+
 
             asyncio.run_coroutine_threadsafe(
                 self.async_update_device(device), loop=self.loop
@@ -98,6 +105,11 @@ class RefossDeviceManager:
                     loop=self.loop,
                 )
 
+    async def async_update_device_online(self, base_device: BaseDevice):
+        """async_update_device_online."""
+        for listener in self.device_listeners:
+            listener.update_device(base_device)
+
     async def async_update_device(self, device_info: HttpDeviceInfo):
         """async_update_device."""
         device = await self.async_build_base_device(device_info)
@@ -127,6 +139,7 @@ class RefossDeviceManager:
             )
 
         if device is not None:
+            await device.async_update()
             self.base_device_map[device_info.uuid] = device
 
         return device

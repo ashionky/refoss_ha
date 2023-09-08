@@ -68,8 +68,6 @@ class HttpDeviceInfo(BaseDictPayload):
             method, namespace, payload, device_uuid
         )
 
-        if message_id is None:
-            return None
         try:
             async with ClientSession() as session, session.post(
                 f"http://{self.inner_ip}/config",
@@ -119,12 +117,6 @@ class HttpDeviceInfo(BaseDictPayload):
         md5_hash.update(strtohash.encode("utf8"))
         signature = md5_hash.hexdigest().lower()
 
-        if not isinstance(namespace, Namespace) and not isinstance(namespace, str):
-            LOGGER.debug(
-                "Namespace parameter：%s must be a Namespace enum or a string.",
-                namespace,
-            )
-            return
         namespace_val = (
             namespace.value if isinstance(namespace, Namespace) else namespace
         )

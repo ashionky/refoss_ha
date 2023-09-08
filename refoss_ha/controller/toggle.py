@@ -64,7 +64,7 @@ class ToggleXMix(BaseDevice):
     async def async_turn_off(self, channel=0) -> None:
         """Turn off."""
         payload = {"togglex": {"onoff": 0, "channel": channel}}
-        res = await self.device.async_execute_cmd(
+        res = await self.async_execute_cmd(
             device_uuid=self.uuid,
             method="SET",
             namespace=Namespace.CONTROL_TOGGLEX,
@@ -76,7 +76,7 @@ class ToggleXMix(BaseDevice):
     async def async_turn_on(self, channel=0) -> None:
         """Turn on."""
         payload = {"togglex": {"onoff": 1, "channel": channel}}
-        res = await self.device.async_execute_cmd(
+        res = await self.async_execute_cmd(
             device_uuid=self.uuid,
             method="SET",
             namespace=Namespace.CONTROL_TOGGLEX,
@@ -84,6 +84,7 @@ class ToggleXMix(BaseDevice):
         )
         if res is not None:
             self._channel_togglex_status[channel] = True
+
 
     async def async_toggle(self, channel=0) -> None:
         """Toggle."""
