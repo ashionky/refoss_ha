@@ -23,14 +23,12 @@ _ABILITY_MATRIX = {
 class RefossDeviceListener(metaclass=ABCMeta):
     """refoss device listener."""
 
-    def update_device(self, device: BaseDevice):
+    async def update_device(self, device: BaseDevice):
         """Update device info."""
 
-    def add_device(self, device: BaseDevice):
+    async def add_device(self, device: BaseDevice):
         """Device Added."""
 
-    def remove_device(self, device_id: str):
-        """Device removed."""
 
 
 class RefossDeviceManager:
@@ -108,14 +106,14 @@ class RefossDeviceManager:
     async def async_update_device_online(self, base_device: BaseDevice):
         """async_update_device_online."""
         for listener in self.device_listeners:
-            listener.update_device(base_device)
+            await listener.update_device(base_device)
 
     async def async_update_device(self, device_info: HttpDeviceInfo):
         """async_update_device."""
         device = await self.async_build_base_device(device_info)
         if device is not None:
             for listener in self.device_listeners:
-                listener.add_device(device)
+                await listener.add_device(device)
 
     async def async_build_base_device(
         self, device_info: HttpDeviceInfo

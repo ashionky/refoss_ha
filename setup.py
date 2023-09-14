@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="refoss_ha",
-    version="1.0.8",
+    version="1.0.9",
     author="ashionky",
     author_email="495519020@qq.com",
     packages=find_packages(),
