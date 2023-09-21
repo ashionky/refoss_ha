@@ -22,19 +22,19 @@ class HttpDeviceInfo(BaseDictPayload):
     """Base class."""
 
     def __init__(
-        self,
-        uuid: str,
-        dev_name: str,
-        device_type: str,
-        dev_soft_ware: str,
-        dev_hard_ware: str,
-        ip: str,
-        port: str,
-        mac: str,
-        sub_type: str,
-        channels: list[int],
-        *args,
-        **kwargs,
+            self,
+            uuid: str,
+            dev_name: str,
+            device_type: str,
+            dev_soft_ware: str,
+            dev_hard_ware: str,
+            ip: str,
+            port: str,
+            mac: str,
+            sub_type: str,
+            channels: list[int],
+            *args,
+            **kwargs,
     ) -> None:
         """Create a HttpDeviceInfo."""
         super().__init__(*args, **kwargs)
@@ -56,12 +56,12 @@ class HttpDeviceInfo(BaseDictPayload):
         return basic_info
 
     async def async_execute_cmd(
-        self,
-        device_uuid: str,
-        method: str,
-        namespace: Union[Namespace, str],
-        payload: dict,
-        timeout: int = 20,
+            self,
+            device_uuid: str,
+            method: str,
+            namespace: Union[Namespace, str],
+            payload: dict,
+            timeout: int = 20,
     ):
         """async_execute_cmd."""
         message, message_id = self._build_mqtt_message(
@@ -70,9 +70,9 @@ class HttpDeviceInfo(BaseDictPayload):
 
         try:
             async with ClientSession() as session, session.post(
-                f"http://{self.inner_ip}/config",
-                json=json.loads(message.decode()),
-                timeout=timeout,
+                    f"http://{self.inner_ip}/config",
+                    json=json.loads(message.decode()),
+                    timeout=timeout,
             ) as response:
                 data = await response.json()
                 if data is not None:
@@ -91,11 +91,11 @@ class HttpDeviceInfo(BaseDictPayload):
             return None
 
     def _build_mqtt_message(
-        self,
-        method: str,
-        namespace: Union[Namespace, str],
-        payload: dict,
-        destination_device_uuid: str,
+            self,
+            method: str,
+            namespace: Union[Namespace, str],
+            payload: dict,
+            destination_device_uuid: str,
     ):
         # Generate a random 16 byte string
         randomstring = "".join(

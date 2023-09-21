@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 import json
-from typing import  Union
+from typing import Union
 
 from ..enums import Namespace
 from ..http_device import HttpDeviceInfo
@@ -12,6 +12,7 @@ from ..http_device import HttpDeviceInfo
 
 class BaseDevice:
     """ "BaseDevice."""
+
     def __init__(self, base_device: HttpDeviceInfo):
         """Construct BaseDevice."""
         self.http_device = base_device
@@ -26,13 +27,13 @@ class BaseDevice:
         self.sub_type = base_device.sub_type
         self._push_coros = []
         self.channels = json.loads(base_device.channels)
-        self.online=True
+        self.online = True
 
     async def async_handle_push_notification(
-        self, namespace: Namespace, data: dict, uuid: str
+            self, namespace: str, data: dict, uuid: str
     ) -> bool:
         """Handle."""
-        self.online=True
+        self.online = True
         for c in self._push_coros:
             try:
                 await c(namespace=namespace, data=data, uuid=uuid)
@@ -40,19 +41,16 @@ class BaseDevice:
                 return False
         return False
 
-    async def async_handle_update(self, namespace: Namespace, data: dict):
-        """Handle."""
+    async def async_handle_update(self):
+        """update device state."""
 
     async def async_update_push_state(
-        self, namespace: Namespace, data: dict, uuid: str
+            self, namespace: str, data: dict, uuid: str
     ):
         """Handle push state."""
 
-    async def async_update(self):
-        """Handle update."""
-
     def register_push_notification_handler_coroutine(
-        self, coro: Callable[[Namespace, dict, str], Awaitable]
+            self, coro: Callable[[str, dict, str], Awaitable]
     ) -> None:
         """Register."""
         if not asyncio.iscoroutinefunction(coro):
@@ -62,7 +60,7 @@ class BaseDevice:
         self._push_coros.append(coro)
 
     def unregister_push_notification_handler_coroutine(
-        self, coro: Callable[[Namespace, dict, str], Awaitable]
+            self, coro: Callable[[str, dict, str], Awaitable]
     ) -> None:
         """unregister_push_notification_handler_coroutine."""
         if coro in self._push_coros:
@@ -77,7 +75,7 @@ class BaseDevice:
             timeout: int = 5,
     ):
         """Execute command."""
-        res=await self.http_device.async_execute_cmd(
+        res = await self.http_device.async_execute_cmd(
             device_uuid=device_uuid,
             method=method,
             namespace=namespace,
@@ -85,8 +83,7 @@ class BaseDevice:
             timeout=timeout,
         )
         if res is None:
-            self.online=False
+            self.online = False
         else:
-            self.online=True
+            self.online = True
         return res
-

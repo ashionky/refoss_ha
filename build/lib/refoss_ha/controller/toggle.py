@@ -8,38 +8,39 @@ from .device import BaseDevice
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class ToggleXMix(BaseDevice):
     """A device."""
+
     def __init__(self, device: HttpDeviceInfo):
         """Initialize."""
         self.device = device
-        self._channel_togglex_status = {}
+        self.status = {}
         super().__init__(device)
 
     def is_on(self, channel=0) -> bool | None:
         """is_on(self, channel)."""
-        return self._channel_togglex_status.get(channel, None)
+        return self.status.get(channel, None)
 
-    async def async_handle_update(self, namespace: Namespace, data: dict):
-        """Handle updates."""
-        if namespace == Namespace.SYSTEM_ALL:
-            payload = (
-                data.get("payload", {})
-                .get("all", {})
-                .get("digest", {})
-                .get("togglex", [])
-            )
-            for c in payload:
-                channel = c["channel"]
-                switch_state = c["onoff"] == 1
-                self._channel_togglex_status[channel] = switch_state
+    async def async_handle_update(self):
+        """Update device state."""
+        payload = {"togglex": {"channel": 0}}
+        res = await self.async_execute_cmd(
+            device_uuid=self.uuid,
+            method="GET",
+            namespace=Namespace.CONTROL_TOGGLEX,
+            payload=payload,
+        )
+        if res is not None:
+            data = res.get("payload", {})
+            await self.async_update_push_state(Namespace.CONTROL_TOGGLEX.value, data, self.uuid)
 
     async def async_update_push_state(
-        self, namespace: Namespace, data: dict, uuid: str
+            self, namespace: str, data: dict, uuid: str
     ):
         """Update push state."""
         try:
-            if namespace== Namespace.CONTROL_TOGGLEX.value:
+            if namespace == Namespace.CONTROL_TOGGLEX.value:
                 payload = data["togglex"]
                 if payload is None:
                     _LOGGER.debug(
@@ -50,16 +51,15 @@ class ToggleXMix(BaseDevice):
                     for c in payload:
                         channel = c["channel"]
                         switch_state = c["onoff"] == 1
-                        self._channel_togglex_status[channel] = switch_state
+                        self.status[channel] = switch_state
 
                 elif isinstance(payload, dict):
                     channel = payload["channel"]
                     switch_state = payload["onoff"] == 1
-                    self._channel_togglex_status[channel] = switch_state
+                    self.status[channel] = switch_state
 
         except Exception as e:
-            print("error",traceback.format_exc())
-
+            print("error", traceback.format_exc())
 
     async def async_turn_off(self, channel=0) -> None:
         """Turn off."""
@@ -71,7 +71,7 @@ class ToggleXMix(BaseDevice):
             payload=payload,
         )
         if res is not None:
-            self._channel_togglex_status[channel] = False
+            self.status[channel] = False
 
     async def async_turn_on(self, channel=0) -> None:
         """Turn on."""
@@ -83,8 +83,7 @@ class ToggleXMix(BaseDevice):
             payload=payload,
         )
         if res is not None:
-            self._channel_togglex_status[channel] = True
-
+            self.status[channel] = True
 
     async def async_toggle(self, channel=0) -> None:
         """Toggle."""

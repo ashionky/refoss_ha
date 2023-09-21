@@ -5,7 +5,6 @@ import uuid
 
 LOGGER = logging.getLogger(__name__)
 
-
 camel_pat = re.compile(r"([A-Z])")
 under_pat = re.compile(r"_([a-z])")
 

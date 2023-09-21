@@ -5,6 +5,7 @@ import json
 import logging
 import socket
 from typing import cast
+from .exceptions import RefossSocketInitErr
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,8 +20,9 @@ def socket_init() -> socket.socket:
 
 class SocketServerProtocol(asyncio.DatagramProtocol):
     """Socket server."""
+
     def register_message_received(
-        self, message_received: Callable | None = None
+            self, message_received: Callable | None = None
     ) -> None:
         """Register message received."""
         self._message_received = message_received
@@ -32,8 +34,11 @@ class SocketServerProtocol(asyncio.DatagramProtocol):
     async def initialize(self) -> None:
         """Initialize socket server."""
         loop = asyncio.get_running_loop()
-        self.sock = socket_init()
-        await loop.create_datagram_endpoint(lambda: self, sock=self.sock)
+        try:
+            self.sock = socket_init()
+            await loop.create_datagram_endpoint(lambda: self, sock=self.sock)
+        except Exception:
+            raise RefossSocketInitErr("socket initialize failed")
 
     async def broadcast_msg(self) -> None:
         """Broadcast."""

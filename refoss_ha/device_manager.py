@@ -8,7 +8,6 @@ from typing import Optional
 
 from .const import PUSH
 from .controller.device import BaseDevice
-from .controller.system import SystemAllMixin
 from .controller.toggle import ToggleXMix
 from .enums import Namespace
 from .http_device import HttpDeviceInfo
@@ -16,7 +15,6 @@ from .socket_server import SocketServerProtocol
 
 _ABILITY_MATRIX = {
     Namespace.CONTROL_TOGGLEX.value: ToggleXMix,
-    Namespace.SYSTEM_ALL.value: SystemAllMixin,
 }
 
 
@@ -30,7 +28,6 @@ class RefossDeviceListener(metaclass=ABCMeta):
         """Device Added."""
 
 
-
 class RefossDeviceManager:
     """RefossDeviceManager."""
 
@@ -40,7 +37,7 @@ class RefossDeviceManager:
         self.socket_server = socket_server
         self.device_listeners = set()
         self.loop = asyncio.get_event_loop()
-        self.tasks=[]
+        self.tasks = []
         self.socket_server.register_message_received(self.message_received)
 
     async def async_start_broadcast_msg(self):
@@ -62,15 +59,14 @@ class RefossDeviceManager:
                 return
             old_device: BaseDevice = self.base_device_map.get(device.uuid)
             if old_device is not None and old_device.inner_ip == device.inner_ip:
-                   if old_device.online == False:
-                       # update device status online
-                       old_device.online = True
-                       self.base_device_map[device.uuid] = old_device
-                       asyncio.run_coroutine_threadsafe(
-                           self.async_update_device_online(old_device), loop=self.loop
-                       )
-                   return
-
+                if old_device.online == False:
+                    # update device status online
+                    old_device.online = True
+                    self.base_device_map[device.uuid] = old_device
+                    asyncio.run_coroutine_threadsafe(
+                        self.async_update_device_online(old_device), loop=self.loop
+                    )
+                return
 
             asyncio.run_coroutine_threadsafe(
                 self.async_update_device(device), loop=self.loop
@@ -116,10 +112,9 @@ class RefossDeviceManager:
                 await listener.add_device(device)
 
     async def async_build_base_device(
-        self, device_info: HttpDeviceInfo
+            self, device_info: HttpDeviceInfo
     ) -> Optional[BaseDevice]:
         """Build base device."""
-        device = None
         res = await device_info.async_execute_cmd(
             device_uuid=device_info.uuid,
             method="GET",
@@ -127,7 +122,7 @@ class RefossDeviceManager:
             payload={},
         )
         if res is None:
-            return device
+            return None
 
         abilities = res.get("payload", {}).get("ability", None)
 
@@ -135,12 +130,10 @@ class RefossDeviceManager:
             device = build_device_from_abilities(
                 http_device_info=device_info, device_abilities=abilities
             )
-
-        if device is not None:
-            await device.async_update()
+            await device.async_handle_update()
             self.base_device_map[device_info.uuid] = device
-
-        return device
+            return device
+        return None
 
     def add_device_listener(self, listener: RefossDeviceListener):
         """Add a device listener."""
@@ -156,7 +149,7 @@ _dynamic_types: dict[str, type] = {}
 
 @lru_cache(maxsize=512)
 def _lookup_cached_type(
-    device_type: str, hardware_version: str, firmware_version: str
+        device_type: str, hardware_version: str, firmware_version: str
 ) -> Optional[type]:
     """Lookup."""
     lookup_string = _caclulate_device_type_name(
@@ -166,7 +159,7 @@ def _lookup_cached_type(
 
 
 def build_device_from_abilities(
-    http_device_info: HttpDeviceInfo, device_abilities: dict
+        http_device_info: HttpDeviceInfo, device_abilities: dict
 ) -> BaseDevice:
     """build_device_from_abilities."""
     cached_type = _lookup_cached_type(
@@ -198,14 +191,14 @@ def build_device_from_abilities(
 
 
 def _caclulate_device_type_name(
-    device_type: str, hardware_version: str, firmware_version: str
+        device_type: str, hardware_version: str, firmware_version: str
 ) -> str:
     """_caclulate_device_type_name."""
     return f"{device_type}:{hardware_version}:{firmware_version}"
 
 
 def _build_cached_type(
-    type_string: str, device_abilities: dict, base_class: type
+        type_string: str, device_abilities: dict, base_class: type
 ) -> type:
     """_build_cached_type."""
     mixin_classes = set()
