@@ -1,7 +1,6 @@
 README.md
 setup.py
 refoss_ha/__init__.py
-refoss_ha/const.py
 refoss_ha/device_manager.py
 refoss_ha/enums.py
 refoss_ha/exceptions.py

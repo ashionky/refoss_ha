@@ -1,147 +1,41 @@
 """device_manager."""
 from __future__ import annotations
 
-from abc import ABCMeta
-import asyncio
 from functools import lru_cache
 from typing import Optional
 
-from .const import PUSH
 from .controller.device import BaseDevice
 from .controller.toggle import ToggleXMix
 from .enums import Namespace
-from .http_device import HttpDeviceInfo
-from .socket_server import SocketServerProtocol
+from .http_device import DeviceInfo
+from .exceptions import RefossHttpRequestFail
 
 _ABILITY_MATRIX = {
     Namespace.CONTROL_TOGGLEX.value: ToggleXMix,
 }
 
 
-class RefossDeviceListener(metaclass=ABCMeta):
-    """refoss device listener."""
+async def async_build_base_device(
+        device_info: DeviceInfo
+) -> Optional[BaseDevice]:
+    """Build base device."""
+    res = await device_info.async_execute_cmd(
+        device_uuid=device_info.uuid,
+        method="GET",
+        namespace=Namespace.SYSTEM_ABILITY,
+        payload={},
+    )
+    if res is None:
+        raise RefossHttpRequestFail
 
-    async def update_device(self, device: BaseDevice):
-        """Update device info."""
+    abilities = res.get("payload", {}).get("ability", None)
 
-    async def add_device(self, device: BaseDevice):
-        """Device Added."""
-
-
-class RefossDeviceManager:
-    """RefossDeviceManager."""
-
-    def __init__(self, socket_server: SocketServerProtocol) -> None:
-        """Initialize."""
-        self.base_device_map: dict[str, BaseDevice] = {}
-        self.socket_server = socket_server
-        self.device_listeners = set()
-        self.loop = asyncio.get_event_loop()
-        self.tasks = []
-        self.socket_server.register_message_received(self.message_received)
-
-    async def async_start_broadcast_msg(self):
-        """Start broadcast."""
-        task = asyncio.create_task(self.socket_server.broadcast_msg())
-        task.done()
-        self.tasks.append(task)
-
-    def message_received(self, data: dict):
-        """Received a message from the server."""
-        self.handle_broadcast_msg(data)
-        self.handle_state_msg(data)
-
-    def handle_broadcast_msg(self, data: dict):
-        """Processing broadcast reply messages."""
-        if "channels" in data and "uuid" in data:
-            device = HttpDeviceInfo.from_dict(data)
-            if device is None:
-                return
-            old_device: BaseDevice = self.base_device_map.get(device.uuid)
-            if old_device is not None and old_device.inner_ip == device.inner_ip:
-                if old_device.online == False:
-                    # update device status online
-                    old_device.online = True
-                    self.base_device_map[device.uuid] = old_device
-                    asyncio.run_coroutine_threadsafe(
-                        self.async_update_device_online(old_device), loop=self.loop
-                    )
-                return
-
-            asyncio.run_coroutine_threadsafe(
-                self.async_update_device(device), loop=self.loop
-            )
-
-    def handle_state_msg(self, data: dict):
-        """Processing status reporting messages."""
-        if "payload" in data and "header" in data:
-            if data is not None:
-                header = data.get("header", {})
-                namespace = header.get("namespace")
-                uuid = header.get("uuid")
-                method = header.get("method")
-                payload = data.get("payload")
-                if namespace is None or uuid is None or payload is None:
-                    return
-
-                if method != PUSH:
-                    return
-
-                baseDevice: BaseDevice = self.base_device_map.get(uuid)
-
-                if baseDevice is None:
-                    return
-
-                asyncio.run_coroutine_threadsafe(
-                    baseDevice.async_handle_push_notification(
-                        namespace=namespace, data=payload, uuid=uuid
-                    ),
-                    loop=self.loop,
-                )
-
-    async def async_update_device_online(self, base_device: BaseDevice):
-        """async_update_device_online."""
-        for listener in self.device_listeners:
-            await listener.update_device(base_device)
-
-    async def async_update_device(self, device_info: HttpDeviceInfo):
-        """async_update_device."""
-        device = await self.async_build_base_device(device_info)
-        if device is not None:
-            for listener in self.device_listeners:
-                await listener.add_device(device)
-
-    async def async_build_base_device(
-            self, device_info: HttpDeviceInfo
-    ) -> Optional[BaseDevice]:
-        """Build base device."""
-        res = await device_info.async_execute_cmd(
-            device_uuid=device_info.uuid,
-            method="GET",
-            namespace=Namespace.SYSTEM_ABILITY,
-            payload={},
+    if abilities is not None:
+        device = build_device_from_abilities(
+            device_info=device_info, device_abilities=abilities
         )
-        if res is None:
-            return None
-
-        abilities = res.get("payload", {}).get("ability", None)
-
-        if abilities is not None:
-            device = build_device_from_abilities(
-                http_device_info=device_info, device_abilities=abilities
-            )
-            await device.async_handle_update()
-            self.base_device_map[device_info.uuid] = device
-            return device
-        return None
-
-    def add_device_listener(self, listener: RefossDeviceListener):
-        """Add a device listener."""
-        self.device_listeners.add(listener)
-
-    def remove_device_listener(self, listener: RefossDeviceListener):
-        """Remove device listener."""
-        self.device_listeners.remove(listener)
+        return device
+    return None
 
 
 _dynamic_types: dict[str, type] = {}
@@ -159,20 +53,20 @@ def _lookup_cached_type(
 
 
 def build_device_from_abilities(
-        http_device_info: HttpDeviceInfo, device_abilities: dict
+        device_info: DeviceInfo, device_abilities: dict
 ) -> BaseDevice:
     """build_device_from_abilities."""
     cached_type = _lookup_cached_type(
-        http_device_info.device_type,
-        http_device_info.hdware_version,
-        http_device_info.fmware_version,
+        device_info.device_type,
+        device_info.hdware_version,
+        device_info.fmware_version,
     )
 
     if cached_type is None:
         device_type_name = _caclulate_device_type_name(
-            http_device_info.device_type,
-            http_device_info.hdware_version,
-            http_device_info.fmware_version,
+            device_info.device_type,
+            device_info.hdware_version,
+            device_info.fmware_version,
         )
 
         base_class = BaseDevice
@@ -185,7 +79,7 @@ def build_device_from_abilities(
 
         _dynamic_types[device_type_name] = cached_type
 
-    component = cached_type(device=http_device_info)
+    component = cached_type(device=device_info)
 
     return component
 

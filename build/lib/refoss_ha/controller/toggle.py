@@ -3,7 +3,7 @@ import logging
 import traceback
 
 from ..enums import Namespace
-from ..http_device import HttpDeviceInfo
+from ..http_device import DeviceInfo
 from .device import BaseDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 class ToggleXMix(BaseDevice):
     """A device."""
 
-    def __init__(self, device: HttpDeviceInfo):
+    def __init__(self, device: DeviceInfo):
         """Initialize."""
         self.device = device
         self.status = {}

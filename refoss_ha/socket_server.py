@@ -22,7 +22,7 @@ class SocketServerProtocol(asyncio.DatagramProtocol):
     """Socket server."""
 
     def register_message_received(
-            self, message_received: Callable | None = None
+            self, message_received: Callable
     ) -> None:
         """Register message received."""
         self._message_received = message_received

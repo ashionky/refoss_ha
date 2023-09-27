@@ -1,7 +1,6 @@
 """util."""
 import logging
 import re
-import uuid
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,10 +38,3 @@ class BaseDictPayload:
             new_key = _underscore_to_camel(k)
             res[new_key] = v
         return res
-
-
-def get_mac_address():
-    """get_mac_addressr."""
-    node = uuid.getnode()
-    mac = uuid.UUID(int=node).hex[-12:]
-    return mac

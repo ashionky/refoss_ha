@@ -18,7 +18,7 @@ from .enums import Namespace
 from .util import BaseDictPayload
 
 
-class HttpDeviceInfo(BaseDictPayload):
+class DeviceInfo(BaseDictPayload):
     """Base class."""
 
     def __init__(
