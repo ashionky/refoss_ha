@@ -71,7 +71,7 @@ class DeviceInfo(BaseDictPayload):
         if self.device_type == "r10":
             path = f"http://{self.inner_ip}/config"
         else:
-            path = f"http://{self.inner_ip}/openConfig"
+            path = f"http://{self.inner_ip}/public"
 
         try:
             async with ClientSession() as session, session.post(
