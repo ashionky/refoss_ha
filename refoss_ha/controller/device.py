@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import asyncio
 from typing import Union
+from collections.abc import Awaitable, Callable
 
 from ..enums import Namespace
 from ..http_device import DeviceInfo
@@ -25,8 +27,39 @@ class BaseDevice:
         self.sub_type = device_info.sub_type
         self.channels = json.loads(device_info.channels)
         self.online = True
+        self._push_coros = []
 
-    async def async_handle_update(self):
+    async def async_handle_push_notification(
+            self, namespace: str, data: dict, uuid: str
+    ) -> None:
+        """Handle."""
+        self.online = True
+        for c in self._push_coros:
+            await c(namespace=namespace, data=data, uuid=uuid)
+
+    def register_push_notification_handler_coroutine(
+            self, coro: Callable[[str, dict, str], Awaitable]
+    ) -> None:
+        """Register."""
+        if not asyncio.iscoroutinefunction(coro):
+            return
+        if coro in self._push_coros:
+            return
+        self._push_coros.append(coro)
+
+    def unregister_push_notification_handler_coroutine(
+            self, coro: Callable[[str, dict, str], Awaitable]
+    ) -> None:
+        """unregister_push_notification_handler_coroutine."""
+        if coro in self._push_coros:
+            self._push_coros.remove(coro)
+
+    async def async_update_push_state(
+            self, namespace: str, data: dict, uuid: str
+    ):
+        """Handle push state."""
+
+    async def async_handle_update(self, channel=0):
         """update device state."""
 
     async def async_execute_cmd(

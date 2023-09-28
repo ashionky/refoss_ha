@@ -3,7 +3,7 @@ from __future__ import annotations
 
 
 class RefossError(Exception):
-    """Base class for .refoss_ha errors."""
+    """Base class for ..refoss_ha errors."""
 
 
 class RefossSocketInitErr(RefossError):

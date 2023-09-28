@@ -6,8 +6,6 @@ from ..enums import Namespace
 from ..http_device import DeviceInfo
 from .device import BaseDevice
 
-_LOGGER = logging.getLogger(__name__)
-
 
 class ToggleXMix(BaseDevice):
     """A device."""
@@ -22,9 +20,9 @@ class ToggleXMix(BaseDevice):
         """is_on(self, channel)."""
         return self.status.get(channel, None)
 
-    async def async_handle_update(self):
+    async def async_handle_update(self, channel=0):
         """Update device state."""
-        payload = {"togglex": {"channel": 0}}
+        payload = {"togglex": {"channel": channel}}
         res = await self.async_execute_cmd(
             device_uuid=self.uuid,
             method="GET",
@@ -39,27 +37,21 @@ class ToggleXMix(BaseDevice):
             self, namespace: str, data: dict, uuid: str
     ):
         """Update push state."""
-        try:
-            if namespace == Namespace.CONTROL_TOGGLEX.value:
-                payload = data["togglex"]
-                if payload is None:
-                    _LOGGER.debug(
-                        f"{data} could not find 'togglex' attribute in push notification data"
-                    )
+        if namespace == Namespace.CONTROL_TOGGLEX.value:
+            payload = data["togglex"]
+            if payload is None:
+                return
 
-                elif isinstance(payload, list):
-                    for c in payload:
-                        channel = c["channel"]
-                        switch_state = c["onoff"] == 1
-                        self.status[channel] = switch_state
-
-                elif isinstance(payload, dict):
-                    channel = payload["channel"]
-                    switch_state = payload["onoff"] == 1
+            elif isinstance(payload, list):
+                for c in payload:
+                    channel = c["channel"]
+                    switch_state = c["onoff"] == 1
                     self.status[channel] = switch_state
 
-        except Exception as e:
-            print("error", traceback.format_exc())
+            elif isinstance(payload, dict):
+                channel = payload["channel"]
+                switch_state = payload["onoff"] == 1
+                self.status[channel] = switch_state
 
     async def async_turn_off(self, channel=0) -> None:
         """Turn off."""

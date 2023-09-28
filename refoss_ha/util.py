@@ -38,3 +38,14 @@ class BaseDictPayload:
             new_key = _underscore_to_camel(k)
             res[new_key] = v
         return res
+
+
+def verify_msg(data: dict) -> str | None:
+    """verify push msg."""
+    header = data.get("header", {})
+    namespace = header.get("namespace", None)
+    uuid = header.get("uuid", None)
+    payload = data.get("payload", None)
+    if namespace is None or uuid is None or payload is None:
+        return None
+    return uuid
