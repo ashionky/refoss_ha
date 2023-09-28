@@ -68,9 +68,14 @@ class DeviceInfo(BaseDictPayload):
             method, namespace, payload, device_uuid
         )
 
+        if self.device_type == "r10":
+            path = f"http://{self.inner_ip}/config"
+        else:
+            path = f"http://{self.inner_ip}/openConfig"
+
         try:
             async with ClientSession() as session, session.post(
-                    f"http://{self.inner_ip}/config",
+                    path,
                     json=json.loads(message.decode()),
                     timeout=timeout,
             ) as response:
