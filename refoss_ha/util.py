@@ -18,6 +18,7 @@ def verify_msg(data: dict) -> str | None:
         return None
     return uuid
 
+
 def _camel_to_underscore(key):
     return camel_pat.sub(lambda x: "_" + x.group(1).lower(), key)
 
@@ -48,6 +49,3 @@ class BaseDictPayload:
             new_key = _underscore_to_camel(k)
             res[new_key] = v
         return res
-
-
-
