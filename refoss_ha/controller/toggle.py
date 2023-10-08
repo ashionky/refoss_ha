@@ -3,8 +3,10 @@ import logging
 import traceback
 
 from ..enums import Namespace
-from ..http_device import DeviceInfo
+from ..device import DeviceInfo
 from .device import BaseDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class ToggleXMix(BaseDevice):
@@ -20,9 +22,9 @@ class ToggleXMix(BaseDevice):
         """is_on(self, channel)."""
         return self.status.get(channel, None)
 
-    async def async_handle_update(self, channel=0):
-        """Update device state."""
-        payload = {"togglex": {"channel": channel}}
+    async def async_handle_update(self):
+        """Update device state,65535 get all channel."""
+        payload = {"togglex": {"channel": 65535}}
         res = await self.async_execute_cmd(
             device_uuid=self.uuid,
             method="GET",
@@ -37,10 +39,13 @@ class ToggleXMix(BaseDevice):
             self, namespace: str, data: dict, uuid: str
     ):
         """Update push state."""
+
         if namespace == Namespace.CONTROL_TOGGLEX.value:
             payload = data["togglex"]
             if payload is None:
-                return
+                _LOGGER.debug(
+                    f"{data} could not find 'togglex' attribute in push notification data"
+                )
 
             elif isinstance(payload, list):
                 for c in payload:

@@ -16,6 +16,7 @@ from aiohttp import ClientSession
 
 from .enums import Namespace
 from .util import BaseDictPayload
+from .exceptions import DeviceTimeoutError
 
 
 class DeviceInfo(BaseDictPayload):
@@ -87,13 +88,9 @@ class DeviceInfo(BaseDictPayload):
                     if messageId == message_id and ack_method == method + "ACK":
                         return data
                 return None
-
         except asyncio.TimeoutError:
             LOGGER.debug(f"http TimeoutError,namespace: {namespace}")
-            return None
-        except Exception as e:
-            LOGGER.debug(f"http err: {e}")
-            return None
+            raise DeviceTimeoutError
 
     def _build_mqtt_message(
             self,

@@ -1,22 +1,12 @@
 """util."""
 import logging
 import re
+import uuid
 
 LOGGER = logging.getLogger(__name__)
 
 camel_pat = re.compile(r"([A-Z])")
 under_pat = re.compile(r"_([a-z])")
-
-
-def verify_msg(data: dict) -> str | None:
-    """verify push msg."""
-    header = data.get("header", {})
-    namespace = header.get("namespace", None)
-    uuid = header.get("uuid", None)
-    payload = data.get("payload", None)
-    if namespace is None or uuid is None or payload is None:
-        return None
-    return uuid
 
 
 def _camel_to_underscore(key):

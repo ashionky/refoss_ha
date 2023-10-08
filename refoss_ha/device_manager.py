@@ -7,8 +7,8 @@ from typing import Optional
 from .controller.device import BaseDevice
 from .controller.toggle import ToggleXMix
 from .enums import Namespace
-from .http_device import DeviceInfo
-from .exceptions import RefossHttpRequestFail
+from .device import DeviceInfo
+from .exceptions import DeviceTimeoutError
 
 _ABILITY_MATRIX = {
     Namespace.CONTROL_TOGGLEX.value: ToggleXMix,
@@ -19,23 +19,27 @@ async def async_build_base_device(
         device_info: DeviceInfo
 ) -> Optional[BaseDevice]:
     """Build base device."""
-    res = await device_info.async_execute_cmd(
-        device_uuid=device_info.uuid,
-        method="GET",
-        namespace=Namespace.SYSTEM_ABILITY,
-        payload={},
-    )
-    if res is None:
-        raise RefossHttpRequestFail
-
-    abilities = res.get("payload", {}).get("ability", None)
-
-    if abilities is not None:
-        device = build_device_from_abilities(
-            device_info=device_info, device_abilities=abilities
+    try:
+        res = await device_info.async_execute_cmd(
+            device_uuid=device_info.uuid,
+            method="GET",
+            namespace=Namespace.SYSTEM_ABILITY,
+            payload={},
         )
-        return device
-    return None
+        if res is None:
+            return None
+
+        abilities = res.get("payload", {}).get("ability", None)
+
+        if abilities is not None:
+            device = build_device_from_abilities(
+                device_info=device_info, device_abilities=abilities
+            )
+            await device.async_handle_update()
+            return device
+        return None
+    except DeviceTimeoutError:
+        return None
 
 
 _dynamic_types: dict[str, type] = {}
