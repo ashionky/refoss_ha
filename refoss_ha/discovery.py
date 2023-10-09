@@ -87,10 +87,16 @@ class Discovery(asyncio.DatagramProtocol, Listener):
         msg = json.dumps(
             {"id": "48cbd88f969eb3c486085cfe7b5eb1e4", "devName": "*"}
         ).encode("utf-8")
-        self.transport.sendto(msg, address)
-        if wait_for:
-            await asyncio.sleep(wait_for)
-            await asyncio.gather(*self.tasks, return_exceptions=True)
+        try:
+            self.transport.sendto(msg, address)
+            if wait_for:
+                await asyncio.sleep(wait_for)
+                await asyncio.gather(*self.tasks, return_exceptions=True)
+        except Exception as err:
+            _LOGGER.debug(
+                "broadcast_msg err: %s",
+                err,
+            )
         return self.devices
 
     def datagram_received(self, data: bytes, addr: tuple[str, int]) -> None:

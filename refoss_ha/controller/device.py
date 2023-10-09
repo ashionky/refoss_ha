@@ -6,7 +6,6 @@ from typing import Union
 
 from ..enums import Namespace
 from ..device import DeviceInfo
-from ..exceptions import DeviceTimeoutError
 
 
 class BaseDevice:
@@ -26,7 +25,6 @@ class BaseDevice:
         self.sub_type = device_info.sub_type
         self._push_coros = []
         self.channels = json.loads(device_info.channels)
-        self.online = True
 
     async def async_handle_update(self):
         """update device state."""
@@ -40,15 +38,11 @@ class BaseDevice:
             timeout: int = 5,
     ):
         """Execute command."""
-        try:
-            res = await self.device_info.async_execute_cmd(
-                device_uuid=device_uuid,
-                method=method,
-                namespace=namespace,
-                payload=payload,
-                timeout=timeout,
-            )
-            self.online = True
-            return res
-        except DeviceTimeoutError:
-            self.online = False
+        res = await self.device_info.async_execute_cmd(
+            device_uuid=device_uuid,
+            method=method,
+            namespace=namespace,
+            payload=payload,
+            timeout=timeout,
+        )
+        return res

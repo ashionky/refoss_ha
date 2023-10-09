@@ -5,6 +5,7 @@ import traceback
 from ..enums import Namespace
 from ..device import DeviceInfo
 from .device import BaseDevice
+from ..exceptions import DeviceTimeoutError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,26 +62,32 @@ class ToggleXMix(BaseDevice):
     async def async_turn_off(self, channel=0) -> None:
         """Turn off."""
         payload = {"togglex": {"onoff": 0, "channel": channel}}
-        res = await self.async_execute_cmd(
-            device_uuid=self.uuid,
-            method="SET",
-            namespace=Namespace.CONTROL_TOGGLEX,
-            payload=payload,
-        )
-        if res is not None:
-            self.status[channel] = False
+        try:
+            res = await self.async_execute_cmd(
+                device_uuid=self.uuid,
+                method="SET",
+                namespace=Namespace.CONTROL_TOGGLEX,
+                payload=payload,
+            )
+            if res is not None:
+                self.status[channel] = False
+        except DeviceTimeoutError:
+            pass
 
     async def async_turn_on(self, channel=0) -> None:
         """Turn on."""
         payload = {"togglex": {"onoff": 1, "channel": channel}}
-        res = await self.async_execute_cmd(
-            device_uuid=self.uuid,
-            method="SET",
-            namespace=Namespace.CONTROL_TOGGLEX,
-            payload=payload,
-        )
-        if res is not None:
-            self.status[channel] = True
+        try:
+            res = await self.async_execute_cmd(
+                device_uuid=self.uuid,
+                method="SET",
+                namespace=Namespace.CONTROL_TOGGLEX,
+                payload=payload,
+            )
+            if res is not None:
+                self.status[channel] = True
+        except DeviceTimeoutError:
+            pass
 
     async def async_toggle(self, channel=0) -> None:
         """Toggle."""
