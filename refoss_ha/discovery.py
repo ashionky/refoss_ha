@@ -128,10 +128,8 @@ class Discovery(asyncio.DatagramProtocol, Listener):
         tasks = [l.device_found(device_info) for l in self._listeners]
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    def close(self) -> None:
+    def clean_up(self) -> None:
         """Close."""
-        if self.transport is not None:
-            self.transport.close()
-
-        self.transport = None
-        self.sock = None
+        self._device_infos = {}
+        self._listeners = []
+        self._tasks = []

@@ -23,7 +23,6 @@ class BaseDevice:
         self.port = device_info.port
         self.mac = device_info.mac
         self.sub_type = device_info.sub_type
-        self._push_coros = []
         self.channels = json.loads(device_info.channels)
 
     async def async_handle_update(self):
