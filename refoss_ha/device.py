@@ -91,6 +91,8 @@ class DeviceInfo(BaseDictPayload):
         except asyncio.TimeoutError:
             LOGGER.debug(f"http TimeoutError,namespace: {namespace}")
             raise DeviceTimeoutError
+        except Exception:
+            return None
 
     def _build_mqtt_message(
             self,
