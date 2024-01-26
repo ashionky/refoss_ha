@@ -2,4 +2,4 @@
 - r10
   
 # Contact information
-- liaopibing@meross.com
+- ashion8912@gmail.com
