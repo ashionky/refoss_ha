@@ -1,5 +1,5 @@
 # Current supported models
-- r10
+- R10
   
 # Contact information
-- ashion8912@gmail.com
+- support@refoss.net
