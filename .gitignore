@@ -1,5 +1,5 @@
 /dist
 /build/*
 .idea
-/refoss_ha.egg-info
+/refoss_ha.egg-info/*
 test/
