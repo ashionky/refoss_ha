@@ -13,4 +13,5 @@ refoss_ha.egg-info/dependency_links.txt
 refoss_ha.egg-info/top_level.txt
 refoss_ha/controller/__init__.py
 refoss_ha/controller/device.py
+refoss_ha/controller/electricity.py
 refoss_ha/controller/toggle.py

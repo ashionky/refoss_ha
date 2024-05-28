@@ -1,6 +1,10 @@
 Metadata-Version: 2.1
 Name: refoss_ha
+<<<<<<< HEAD
 Version: 1.2.0
+=======
+Version: 1.2.1
+>>>>>>> a7478262736525220ac688bd5a4a3a32bee9aacc
 Author: ashionky
 Author-email: 495519020@qq.com
 Requires-Python: >=3.11
