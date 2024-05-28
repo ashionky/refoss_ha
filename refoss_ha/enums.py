@@ -9,4 +9,3 @@ class Namespace(Enum):
     SYSTEM_ABILITY = "Appliance.System.Ability"
 
     CONTROL_TOGGLEX = "Appliance.Control.ToggleX"
-    CONTROL_ELECTRICITYX = "Appliance.Control.ElectricityX"
