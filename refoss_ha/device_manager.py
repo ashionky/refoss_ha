@@ -6,12 +6,14 @@ from typing import Optional
 
 from .controller.device import BaseDevice
 from .controller.toggle import ToggleXMix
+from .controller.electricity import ElectricityXMix
 from .enums import Namespace
 from .device import DeviceInfo
 from .exceptions import DeviceTimeoutError
 
 _ABILITY_MATRIX = {
     Namespace.CONTROL_TOGGLEX.value: ToggleXMix,
+    Namespace.CONTROL_ELECTRICITYX.value: ElectricityXMix,
 }
 
 
