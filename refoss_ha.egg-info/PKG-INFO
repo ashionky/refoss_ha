@@ -1,7 +1,9 @@
 Metadata-Version: 2.1
 Name: refoss_ha
-Version: 1.2.2
+Version: 1.2.3
+Home-page: https://github.com/ashionky/refoss_ha
 Author: ashionky
 Author-email: 495519020@qq.com
+License: MIT
 Requires-Python: >=3.11
 License-File: LICENSE
