@@ -4,5 +4,5 @@
   - python3 -m pip install  --upgrade setuptools wheel
 - 打包
   - python3 setup.py bdist_wheel
-  - python3 -m twine upload  dist/refoss_ha-1.2.4-py3-none-any.whl
+  - python3 -m twine upload  dist/refoss_ha-1.2.5-py3-none-any.whl
 
