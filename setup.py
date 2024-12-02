@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="refoss_ha",
-    version="1.2.4",
+    version="1.2.5",
     author="ashionky",
     author_email="495519020@qq.com",
     classifiers=[
