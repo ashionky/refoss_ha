@@ -81,9 +81,11 @@ class Discovery(asyncio.DatagramProtocol, Listener):
 
         await self._loop.create_datagram_endpoint(lambda: self, sock=self.sock)
 
-    async def broadcast_msg(self, wait_for: int = 0) -> List[DeviceInfo]:
-        """Broadcast."""
-        address = ("255.255.255.255", 9988)
+    async def broadcast_msg(
+        self, wait_for: int = 0, host: str | None = None
+    ) -> List[DeviceInfo]:
+        """Discover devices using a broadcast or unicast message."""
+        address = (host or "255.255.255.255", 9988)
         msg = json.dumps(
             {"id": "48cbd88f969eb3c486085cfe7b5eb1e4", "devName": "*"}
         ).encode("utf-8")
