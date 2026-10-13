@@ -81,22 +81,41 @@ class Discovery(asyncio.DatagramProtocol, Listener):
 
         await self._loop.create_datagram_endpoint(lambda: self, sock=self.sock)
 
-    async def broadcast_msg(self, wait_for: int = 0) -> List[DeviceInfo]:
+    async def broadcast_msg(
+        self, wait_for: int = 0, addresses: list[str] | None = None
+    ) -> List[DeviceInfo]:
         """Broadcast."""
-        address = ("255.255.255.255", 9988)
         msg = json.dumps(
             {"id": "48cbd88f969eb3c486085cfe7b5eb1e4", "devName": "*"}
         ).encode("utf-8")
-        try:
-            self.transport.sendto(msg, address)
-            if wait_for:
+        if addresses is None:
+            address = ("255.255.255.255", 9988)
+            try:
+                self.transport.sendto(msg, address)
+                if wait_for:
+                    await asyncio.sleep(wait_for)
+                    await asyncio.gather(*self.tasks, return_exceptions=True)
+            except Exception as err:
+                _LOGGER.debug(
+                    "broadcast_msg err: %s",
+                    err,
+                )
+            return self.devices
+
+        for host in addresses:
+            try:
+                self.transport.sendto(msg, (host, 9988))
+            except Exception as err:
+                _LOGGER.debug("broadcast_msg err to %s: %s", host, err)
+        if wait_for:
+            try:
                 await asyncio.sleep(wait_for)
                 await asyncio.gather(*self.tasks, return_exceptions=True)
-        except Exception as err:
-            _LOGGER.debug(
-                "broadcast_msg err: %s",
-                err,
-            )
+            except Exception as err:
+                _LOGGER.debug(
+                    "broadcast_msg err: %s",
+                    err,
+                )
         return self.devices
 
     def datagram_received(self, data: bytes, addr: tuple[str, int]) -> None:
